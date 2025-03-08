@@ -2,6 +2,7 @@ import {
 	AssistantMessage,
 	BasePromptElementProps,
 	Chunk,
+	// PrioritizedList,
 	PromptElement,
 	PromptElementProps,
 	PromptMetadata,
@@ -14,6 +15,7 @@ import {
 } from '@vscode/prompt-tsx';
 import { ToolResult } from '@vscode/prompt-tsx/dist/base/promptElements';
 import * as vscode from 'vscode';
+// import { isTsxToolUserMetadata } from './toolParticipant';
 
 export interface ToolCallRound {
 	response: string;
@@ -45,16 +47,21 @@ export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
 					- Don't make assumptions about the situation- gather context first, then
 					perform the task or answer the question. <br />
 					- Don't ask the user for confirmation to use tools, just use them.
+					- Check if the user has no files in the directory, create a directory 
+					structure in the format of json structure with nested folders if the file/files should be under folder. 
+					Then generate each files and folder according to the json structure.
+					- If the user has files in the directory, ask what portion of the file should be edited/created/removed.
 				</UserMessage>
+				{/* <History context={this.props.context} priority={10} /> */}
 				<PromptReferences
 					references={this.props.request.references}
 					priority={20}
 				/>
-				{this.props.request.prompt && <UserMessage>{this.props.request.prompt}</UserMessage>}
+				<UserMessage>{this.props.request.prompt}</UserMessage>
 				<ToolCalls
 					toolCallRounds={this.props.toolCallRounds}
 					toolInvocationToken={this.props.request.toolInvocationToken}
-					toolCallResults={this.props.toolCallResults} priority={10} />
+					toolCallResults={this.props.toolCallResults} />
 			</>
 		);
 	}
@@ -77,10 +84,10 @@ class ToolCalls extends PromptElement<ToolCallsProps, void> {
 			return undefined;
 		}
 
-		// Note - for the copilot models, the final prompt must end with a non-tool-result UserMessage
+		// Note- for the copilot models, the final prompt must end with a non-tool-result UserMessage
 		return <>
 			{this.props.toolCallRounds.map(round => this.renderOneToolCallRound(round))}
-			<UserMessage>Above is the result of calling one or more tools. The user cannot see the results, so answer with a 2 liner text what the outcome is. If it sounds like an error just forward it as it is.</UserMessage>
+			<UserMessage>Above is the result of calling one or more tools. The user cannot see the results, so you should explain them to the user if referencing them in your answer.</UserMessage>
 		</>;
 	}
 
@@ -117,7 +124,7 @@ class ToolResultElement extends PromptElement<ToolResultElementProps, void> {
 			countTokens: async (content: string) => sizing.countTokens(content),
 		};
 
-		const toolResult =
+		const toolResult = this.props.toolCallResult ??
 			await vscode.lm.invokeTool(this.props.toolCall.name, { input: this.props.toolCall.input, toolInvocationToken: this.props.toolInvocationToken, tokenizationOptions }, dummyCancellationToken);
 
 		return (
@@ -199,7 +206,7 @@ interface PromptReferencesProps extends BasePromptElementProps {
 }
 
 /**
- * Render references that were included in the userHU 's request, eg files and selections.
+ * Render references that were included in the user's request, eg files and selections.
  */
 class PromptReferences extends PromptElement<PromptReferencesProps, void> {
 	render(_state: void, _sizing: PromptSizing): PromptPiece {
@@ -216,7 +223,7 @@ class PromptReferences extends PromptElement<PromptReferencesProps, void> {
 interface PromptReferenceProps extends BasePromptElementProps {
 	ref: vscode.ChatPromptReference;
 	excludeReferences?: boolean;
-}
+}	
 
 class PromptReferenceElement extends PromptElement<PromptReferenceProps> {
 	async render(_state: void, _sizing: PromptSizing): Promise<PromptPiece | undefined> {
@@ -226,7 +233,7 @@ class PromptReferenceElement extends PromptElement<PromptReferenceProps> {
 			return (
 				<Tag name="context">
 					{!this.props.excludeReferences && <references value={[new PromptReference(value)]} />}
-					{value.fsPath}:<br /> 
+					{value.fsPath}:<br />
 					``` <br />
 					{fileContents}<br />
 					```<br />
@@ -249,7 +256,6 @@ class PromptReferenceElement extends PromptElement<PromptReferenceProps> {
 		}
 	}
 }
-
 type TagProps = PromptElementProps<{
 	name: string;
 }>;

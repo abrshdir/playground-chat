@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as vscode from 'vscode';
-import { TabCountTool, FindFilesTool, RunInTerminalTool, DeleteFilesTool, FindAndOpenFileTool, CreateAndStreamFileTool, EditLineTool } from './tools'; // Adjust the import path
-
+import { TabCountTool } from './file-manager/TabCountTool';
+import { FindFilesTool } from './file-manager/FindFilesTool';
+import { RunInTerminalTool } from './file-manager/RunInTerminalTool';
+import { DeleteFilesTool } from './file-manager/DeleteFilesTool';
+import { FindAndOpenFileTool } from './file-manager/FindAndOpenFileTool';
+import { CreateAndStreamFileTool } from './file-manager/CreateAndStreamFileTool';
+import { EditLineTool } from './file-manager/EditLineTool';
 export class OllamaToolAdapter {
 	private tools: Map<string, { tool: vscode.LanguageModelTool<any>, name: string, description: string }>;
 

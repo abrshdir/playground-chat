@@ -1,29 +1,29 @@
 import { renderPrompt } from '@vscode/prompt-tsx';
 import * as vscode from 'vscode';
 import { ToolCallRound, ToolUserPrompt, ToolResultMetadata } from './toolsPrompt';
-import { getOllamaModel } from './getOllama';
+import { getOllamaModel } from './models/getOllama';
 
-export interface TsxToolUserMetadata {
-	toolCallsMetadata: ToolCallsMetadata;
-}
+// export interface TsxToolUserMetadata {
+// 	toolCallsMetadata: ToolCallsMetadata;
+// }
 
-export interface ToolCallsMetadata {
-	toolCallRounds: ToolCallRound[];
-	toolCallResults: Record<string, vscode.LanguageModelToolResult>;
-}
+// export interface ToolCallsMetadata {
+// 	toolCallRounds: ToolCallRound[];
+// 	toolCallResults: Record<string, vscode.LanguageModelToolResult>;
+// }
 
-export function isTsxToolUserMetadata(obj: unknown): obj is TsxToolUserMetadata {
-	// If you change the metadata format, you would have to make this stricter or handle old objects in old ChatRequest metadata
-	return !!obj &&
-		!!(obj as TsxToolUserMetadata).toolCallsMetadata &&
-		Array.isArray((obj as TsxToolUserMetadata).toolCallsMetadata.toolCallRounds);
-}
+// export function isTsxToolUserMetadata(obj: unknown): obj is TsxToolUserMetadata {
+// 	// If you change the metadata format, you would have to make this stricter or handle old objects in old ChatRequest metadata
+// 	return !!obj &&
+// 		!!(obj as TsxToolUserMetadata).toolCallsMetadata &&
+// 		Array.isArray((obj as TsxToolUserMetadata).toolCallsMetadata.toolCallRounds);
+// }
 
 export function registerToolUserChatParticipant(context: vscode.ExtensionContext) {
 	const handler: vscode.ChatRequestHandler = async (request: vscode.ChatRequest, chatContext: vscode.ChatContext, stream: vscode.ChatResponseStream, token: vscode.CancellationToken) => {
 
 
-		const model = await getOllamaModel();
+		const model = await getOllamaModel('qwen2.5-coder:7b');
 
 		if (!model) {
 			stream.markdown('Failed to initialize the cat model. Please try again later.');
@@ -121,15 +121,15 @@ export function registerToolUserChatParticipant(context: vscode.ExtensionContext
 
 		await runWithTools();
 
-		return {
-			metadata: {
-				// Return tool call metadata so it can be used in prompt history on the next request
-				toolCallsMetadata: {
-					toolCallResults: accumulatedToolResults,
-					toolCallRounds
-				}
-			} satisfies TsxToolUserMetadata,
-		};
+		// return {
+		// 	metadata: {
+		// 		// Return tool call metadata so it can be used in prompt history on the next request
+		// 		toolCallsMetadata: {
+		// 			toolCallResults: accumulatedToolResults,
+		// 			toolCallRounds
+		// 		}
+		// 	} satisfies TsxToolUserMetadata,
+		// };
 	};
 
 	const toolUser = vscode.chat.createChatParticipant('chat-tools-sample.tools', handler);

@@ -19,7 +19,7 @@
 		"onCommand:chat-tools-sample.activate",
 		"onLanguageModelTool:chat-tools-sample_createAndStreamFile",
 		"onLanguageModelTool:chat-tools-sample_findAndOpenFile",
-		"chat-tools-sample_editLine"	
+		"onLanguageModelTool:chat-tools-sample_editLine"
 	],
 	"capabilities": {
 		"virtualWorkspaces": true,
@@ -176,24 +176,32 @@
 			{
 				"name": "chat-tools-sample_editLine",
 				"tags": [
-					"edit",
-					"modify",
-					"replace",
-					"purge",
+					"files",
+					"editor",
 					"chat-tools-sample"
 				],
-				"displayName": "Edit File",
-				"modelDescription": "Edit specific lines of codes in the opened file in the editor",
+				"displayName": "Edit Line in File",
+				"modelDescription": "Edit a specific line of code in a file opened in the editor",
 				"inputSchema": {
 					"type": "object",
 					"properties": {
-						"pattern": {
+						"filePath": {
 							"type": "string",
-							"description": "Edit specific lines of codes in the assigned file from the editor"
+							"description": "The path of the file to edit (relative to the workspace root)"
+						},
+						"lineNumber": {
+							"type": "number",
+							"description": "The line number to edit (1-based index)"
+						},
+						"newContent": {
+							"type": "string",
+							"description": "The new content to replace the line with"
 						}
 					},
 					"required": [
-						"pattern"
+						"filePath",
+						"lineNumber",
+						"newContent"
 					]
 				}
 			},
@@ -289,12 +297,14 @@
 	"dependencies": {
 		"@vscode/chat-extension-utils": "^0.0.0-alpha.1",
 		"@vscode/prompt-tsx": "^0.3.0-alpha.12",
-		"ollama": "^0.5.13"
+		"ollama": "^0.5.13",
+		"react": "^19.0.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.13.0",
 		"@stylistic/eslint-plugin": "^2.9.0",
 		"@types/node": "^20",
+		"@types/react": "^19.0.10",
 		"@types/vscode": "^1.95.0",
 		"eslint": "^9.13.0",
 		"typescript": "^5.7.2",

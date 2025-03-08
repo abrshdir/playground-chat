@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as vscode from 'vscode';
-import { OllamaToolAdapter } from './schema-tool';
+import { OllamaToolAdapter } from '../schema-tool';
 
 // Define interfaces for API response
 interface ModelDetails {
@@ -45,8 +45,11 @@ class ContentParser {
 class OllamaModel {
 	private apiUrl = "http://localhost:11434/api/tags";
 	private chatUrl = "http://localhost:11434/api/chat";
-	private targetModelName = 'qwen2.5-coder:7b';
+	private targetModelName = '';
 
+	constructor(modelName: string) {
+		this.targetModelName = modelName;
+	}
 	async getModel() {
 		try {
 			const response = await fetch(this.apiUrl);
@@ -217,7 +220,7 @@ class OllamaModel {
 
 }
 
-export async function getOllamaModel() {
-	const ollamaModel = new OllamaModel();
+export async function getOllamaModel(modelName: string) {
+	const ollamaModel = new OllamaModel(modelName);
 	return await ollamaModel.getModel();
 }
